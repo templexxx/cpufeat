@@ -25,7 +25,7 @@ TEXT ·xgetbv(SB),NOSPLIT,$0-8
 	MOVL $0, edx+4(FP)
 #else
 	MOVL $0, CX
-	XGETBV
+	WORD $0x010f; BYTE $0xd0 //XGETBV
 	MOVL AX, eax+0(FP)
 	MOVL DX, edx+4(FP)
 #endif

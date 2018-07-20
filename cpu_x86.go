@@ -41,7 +41,7 @@ func init() {
 		// Check if XMM and YMM registers have OS support.
 		osSupportsAVX = isSet(1, eax) && isSet(2, eax)
 		// Check is ZMM registers have OS support.
-		osSupportAVX512 = detectOSAVX512(eax)
+		osSupportAVX512 = (eax>>5)&7 == 7 && (eax>>1)&3 == 3
 	}
 
 	X86.HasAVX = isSet(28, ecx1) && osSupportsAVX
@@ -62,22 +62,9 @@ func isSet(bitpos uint, value uint32) bool {
 	return value&(1<<bitpos) != 0
 }
 
-func detectOSAVX512(eax uint32) bool {
-	return (eax>>5)&7 == 7 && (eax>>1)&3 == 3
-}
-
 func hasAVX512(ebx uint32) bool {
-	if ebx&(1<<16) == 0 {
-		return false // no AVX512F
-	}
-	if ebx&(1<<17) == 0 {
-		return false // no AVX512DQ
-	}
-	if ebx&(1<<30) == 0 {
-		return false // no AVX512BW
-	}
-	if ebx&(1<<31) == 0 {
-		return false // no AVX512VL
-	}
-	return true
+	return isSet(16, ebx) && //  AVX512F
+		isSet(17, ebx) && //  AVX512DQ
+		isSet(30, ebx) && // AVX512BW
+		isSet(31, ebx) // AVX512VL
 }
